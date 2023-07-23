@@ -24,6 +24,14 @@ export default function VideoPlayer() {
         ...prevTimestamps,
         { start: watchDuration, end: currentTime },
       ]);
+    } else if (
+      watchDuration - currentTime >
+      1.1 * speedChangeTimestamps.slice(-1)[0].speed
+    ) {
+        setSkippedTimestamps((prevTimestamps) => [
+                ...prevTimestamps,
+                { start: watchDuration, end: currentTime },
+              ]);
     }
 
     setWatchDuration(currentTime);
@@ -50,6 +58,7 @@ export default function VideoPlayer() {
         }
       } else {
         pauseTimestamps.push(currentTime);
+        setPauseTimestamps(pauseTimestamps);
       }
     }
   };
