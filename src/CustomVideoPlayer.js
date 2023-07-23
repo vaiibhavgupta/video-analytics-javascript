@@ -6,26 +6,16 @@ export default function VideoPlayer() {
 
   const [watchDuration, setWatchDuration] = useState(0);
 
-  const [speedChangeTimestamps, setSpeedChangeTimestamps] = useState([
-    { timestamp: 0, speed: 1 },
-  ]);
+  const [speedChangeTimestamps, setSpeedChangeTimestamps] = useState([{ timestamp: 0, speed: 1 }]);
 
   const [pauseTimestamps, setPauseTimestamps] = useState([]);
-
   const [skippedTimestamps, setSkippedTimestamps] = useState([]);
 
   const handleProgress = (progress) => {
     const currentTime = progress.playedSeconds;
-    if (
-      currentTime - watchDuration >
-      1.1 * speedChangeTimestamps.slice(-1)[0].speed
-    ) {
-      setSkippedTimestamps((prevTimestamps) => [
-        ...prevTimestamps,
-        { start: watchDuration, end: currentTime },
-      ]);
+    if (Math.abs(currentTime - watchDuration) > 1.1 * speedChangeTimestamps.slice(-1)[0].speed) {
+      setSkippedTimestamps((prevTimestamps) => [...prevTimestamps, { start: watchDuration, end: currentTime }]);
     }
-
     setWatchDuration(currentTime);
   };
 
@@ -38,11 +28,7 @@ export default function VideoPlayer() {
 
   const handlePlay = () => {
     const currentTime = playerRef.current.getCurrentTime();
-    if (
-      currentTime > 1 &&
-      currentTime > watchDuration &&
-      currentTime - watchDuration < 1
-    ) {
+    if (currentTime > 1 && currentTime > watchDuration && currentTime - watchDuration < 1) {
       if (skippedTimestamps.length > 0) {
         if (currentTime - skippedTimestamps.slice(-1)[0].end > 1) {
           pauseTimestamps.push(currentTime);
@@ -77,8 +63,7 @@ export default function VideoPlayer() {
           <ul>
             {skippedTimestamps.map((timestamp, index) => (
               <li key={index}>
-                {index + 1}. From {timestamp.start.toFixed(2)} to{" "}
-                {timestamp.end.toFixed(2)}
+                {index + 1}. From {timestamp.start.toFixed(2)} to {timestamp.end.toFixed(2)}
               </li>
             ))}
           </ul>
@@ -91,8 +76,7 @@ export default function VideoPlayer() {
           <ul>
             {speedChangeTimestamps.map((timestamp, index) => (
               <li key={index}>
-                {index + 1}. Set at {timestamp.speed}x at{" "}
-                {timestamp.timestamp.toFixed(2)} seconds
+                {index + 1}. Set at {timestamp.speed}x at {timestamp.timestamp.toFixed(2)} seconds
               </li>
             ))}
           </ul>
@@ -100,7 +84,6 @@ export default function VideoPlayer() {
         <br />
         <hr />
         <br />
-
         <div>
           <h4>Pause Timestamps:</h4>
           <ul>
@@ -111,9 +94,6 @@ export default function VideoPlayer() {
             ))}
           </ul>
         </div>
-        <br />
-        <hr />
-        <br />
       </div>
     </div>
   );
