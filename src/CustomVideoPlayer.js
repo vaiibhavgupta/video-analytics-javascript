@@ -1,16 +1,47 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import ReactPlayer from "react-player";
 
 export default function VideoPlayer() {
+  const divRef = useRef(null);
+  const [isDivInFocus, setIsDivInFocus] = useState(null);
+
   const playerRef = useRef(null);
-
   const [watchDuration, setWatchDuration] = useState(0);
-
-  const [speedChangeTimestamps, setSpeedChangeTimestamps] = useState([{ timestamp: 0, speed: 1 }]);
-
+  // const [skippedDuration, setskippedDuration] = useState(0);
   const [pauseTimestamps, setPauseTimestamps] = useState([]);
   const [skippedTimestamps, setSkippedTimestamps] = useState([]);
+  const [speedChangeTimestamps, setSpeedChangeTimestamps] = useState([{ timestamp: 0, speed: 1 }]);
 
+  // play video if visible in view port
+  useEffect(() => {
+    const observer = new IntersectionObserver(handleIntersection, {
+      root: null,
+      rootMargin: "0px",
+      threshold: 1, // Fully visible in the viewport
+    });
+
+    if (divRef.current) {
+      observer.observe(divRef.current);
+    }
+
+    return () => {
+      if (divRef.current) {
+        observer.unobserve(divRef.current);
+      }
+    };
+  }, []);
+
+  const handleIntersection = (entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        setIsDivInFocus(true);
+      } else {
+        setIsDivInFocus(false);
+      }
+    });
+  };
+
+  // update watch duration
   const handleProgress = (progress) => {
     const currentTime = progress.playedSeconds;
     if (Math.abs(currentTime - watchDuration) > 1.1 * speedChangeTimestamps.slice(-1)[0].speed) {
@@ -19,6 +50,7 @@ export default function VideoPlayer() {
     setWatchDuration(currentTime);
   };
 
+  // update timestamps when playback speed is changed
   const handlePlaybackRateChange = (newPlaybackRate) => {
     setSpeedChangeTimestamps((prevTimestamps) => [
       ...prevTimestamps,
@@ -26,10 +58,14 @@ export default function VideoPlayer() {
     ]);
   };
 
+  // update pause timestamps
   const handlePlay = () => {
     const currentTime = playerRef.current.getCurrentTime();
     if (currentTime > 1 && currentTime > watchDuration && currentTime - watchDuration < 1) {
       if (skippedTimestamps.length > 0) {
+        // this if else loop prevents registration of a pause within a second of a skip.
+        // checking if length of skippedTimestamps > 0 to apply the logic.
+        // if length = 0, then register a pause as there are no skips yet.
         if (currentTime - skippedTimestamps.slice(-1)[0].end > 1) {
           pauseTimestamps.push(currentTime);
           setPauseTimestamps(pauseTimestamps);
@@ -42,11 +78,13 @@ export default function VideoPlayer() {
 
   return (
     <div>
-      <div className="flex justify-center">
+      <div ref={divRef} className="flex justify-center">
         <ReactPlayer
           ref={playerRef}
-          url="https://www.youtube.com/watch?v=RpaxxN8jTHo"
+          // url="https://www.youtube.com/watch?v=RpaxxN8jTHo"
+          url="https://www.youtube.com/watch?v=EiYm20F9WXU"
           controls
+          playing={isDivInFocus}
           onProgress={handleProgress}
           onPlaybackRateChange={handlePlaybackRateChange}
           onPlay={handlePlay}
@@ -95,6 +133,128 @@ export default function VideoPlayer() {
           </ul>
         </div>
       </div>
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
     </div>
   );
 }
