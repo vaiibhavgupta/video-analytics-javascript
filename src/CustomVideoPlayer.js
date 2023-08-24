@@ -4,7 +4,6 @@ import calculateAggWatchedDuration from "./UpdateAggWatchedDuration";
 
 export default function VideoPlayer() {
   const divRef = useRef(null);
-  const [isDivInFocus, setIsDivInFocus] = useState(null);
 
   const playerRef = useRef(null);
   const [updatedFlag, setUpdatedFlag] = useState(false);
@@ -23,6 +22,10 @@ export default function VideoPlayer() {
   const [speedChangeTimestamp, setSpeedChangeTimestamp] = useState([
     { timestamp: Math.floor(Date.now() / 1000), speed: 1 },
   ]);
+
+  const [endPointOOF, setEndPointOOF] = useState(0);
+  const [startPointOOF, setStartPointOOF] = useState(0);
+  const [outOfFocusTimeStamp, setOutOfFocusTimestamp] = useState([]);
 
   // play video if visible in view port
   useEffect(() => {
@@ -46,9 +49,9 @@ export default function VideoPlayer() {
   const handleIntersection = (entries) => {
     entries.forEach((entry) => {
       if (entry.isIntersecting) {
-        setIsDivInFocus(true);
+        setEndPointOOF(Math.floor(Date.now() / 1000));
       } else {
-        setIsDivInFocus(false);
+        setStartPointOOF(Math.floor(Date.now() / 1000));
       }
     });
   };
@@ -69,6 +72,11 @@ export default function VideoPlayer() {
     }
 
     setWatchDuration(currentTime);
+
+    if (endPointOOF > startPointOOF && startPointOOF > 0) {
+      setOutOfFocusTimestamp((prevTimestamps) => [...prevTimestamps, { start: startPointOOF, end: endPointOOF }]);
+      setStartPointOOF(0);
+    }
   };
 
   // update timestamps when playback speed is changed
@@ -110,8 +118,9 @@ export default function VideoPlayer() {
     setAggWatchedDuration(calculateAggWatchedDuration(watchedLocation));
     setUpdatedFlag(false);
   }
-  console.log("watchedLocation", watchedLocation);
-  console.log("aggWatchedDuration", aggWatchedDuration);
+
+  // console.log("watchedLocation", watchedLocation);
+  // console.log("aggWatchedDuration", aggWatchedDuration);
 
   return (
     <div>
@@ -121,7 +130,6 @@ export default function VideoPlayer() {
           // url="https://www.youtube.com/watch?v=RpaxxN8jTHo"
           url="https://www.youtube.com/watch?v=EiYm20F9WXU"
           controls
-          playing={isDivInFocus}
           onProgress={handleProgress}
           onPlaybackRateChange={handlePlaybackRateChange}
           onPlay={handlePlay}
@@ -186,6 +194,19 @@ export default function VideoPlayer() {
           <ul class="p-1">
             {pauseTimestamp.map((timestamp, index) => (
               <li key={index}>at TS - {timestamp}</li>
+            ))}
+          </ul>
+        </div>
+        <br />
+        <hr />
+        <br />
+        <p class="text-2xl">Out-Of-Focus Timestamps:</p>
+        <div>
+          <ul>
+            {outOfFocusTimeStamp.map((timestamp, index) => (
+              <li key={index}>
+                {index + 1}. From {timestamp.start} to {timestamp.end}
+              </li>
             ))}
           </ul>
         </div>

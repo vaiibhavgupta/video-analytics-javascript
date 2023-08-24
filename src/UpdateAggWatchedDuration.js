@@ -13,10 +13,9 @@ export default function calculateAggWatchedDuration(data) {
       // Else, if there's a new portion in this interval, add that to the total
       totalDuration += interval.end - lastEnd;
     }
-
     // Update the lastEnd to the end of the current interval
     lastEnd = Math.max(lastEnd, interval.end);
   }
 
-  return totalDuration; // Outputs: 25
+  return totalDuration;
 }
