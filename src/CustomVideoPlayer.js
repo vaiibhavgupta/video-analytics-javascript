@@ -5,6 +5,8 @@ import calculateAggWatchedDuration from "./UpdateAggWatchedDuration";
 export default function VideoPlayer() {
   const divRef = useRef(null);
 
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+
   const playerRef = useRef(null);
   const [updatedFlag, setUpdatedFlag] = useState(false);
   const [watchDuration, setWatchDuration] = useState(0);
@@ -26,6 +28,10 @@ export default function VideoPlayer() {
   const [endPointOOF, setEndPointOOF] = useState(0);
   const [startPointOOF, setStartPointOOF] = useState(0);
   const [outOfFocusTimeStamp, setOutOfFocusTimestamp] = useState([]);
+
+  const [startPointTabSwitch, setStartPointTabSwitch] = useState([]);
+  const [endPointTabSwitch, setEndPointTabSwitch] = useState([]);
+  const [tabSwitchTimeStamp, setTabSwitchTimestamp] = useState([]);
 
   // play video if visible in view port
   useEffect(() => {
@@ -56,6 +62,29 @@ export default function VideoPlayer() {
     });
   };
 
+  useEffect(() => {
+    // Function to handle visibility change
+    const handleVisibilityChange = () => {
+      if (isVideoPlaying) {
+        if (document.hidden) {
+          // console.log("User switched tabs while video was playing!", Math.floor(Date.now() / 1000));
+          setStartPointTabSwitch(Math.floor(Date.now() / 1000));
+        } else {
+          // console.log("tab in focus!", Math.floor(Date.now() / 1000));
+          setEndPointTabSwitch(Math.floor(Date.now() / 1000));
+        }
+      }
+    };
+
+    // Add event listeners
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    // Cleanup the event listeners on unmount
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  });
+
   // update watch duration
   const handleProgress = (progress) => {
     const currentTime = progress.playedSeconds;
@@ -76,6 +105,14 @@ export default function VideoPlayer() {
     if (endPointOOF > startPointOOF && startPointOOF > 0) {
       setOutOfFocusTimestamp((prevTimestamps) => [...prevTimestamps, { start: startPointOOF, end: endPointOOF }]);
       setStartPointOOF(0);
+    }
+
+    if (endPointTabSwitch > startPointTabSwitch && startPointTabSwitch > 0) {
+      setTabSwitchTimestamp((prevTimestamps) => [
+        ...prevTimestamps,
+        { start: startPointTabSwitch, end: endPointTabSwitch },
+      ]);
+      setStartPointTabSwitch(0);
     }
   };
 
@@ -117,6 +154,7 @@ export default function VideoPlayer() {
   if (updatedFlag) {
     setAggWatchedDuration(calculateAggWatchedDuration(watchedLocation));
     setUpdatedFlag(false);
+    setIsVideoPlaying(false);
   }
 
   // console.log("watchedLocation", watchedLocation);
@@ -132,8 +170,17 @@ export default function VideoPlayer() {
           controls
           onProgress={handleProgress}
           onPlaybackRateChange={handlePlaybackRateChange}
-          onPlay={handlePlay}
-          onEnded={handleEnd}
+          onPlay={() => {
+            setIsVideoPlaying(true);
+            handlePlay();
+          }}
+          onPause={() => {
+            setIsVideoPlaying(false);
+          }}
+          onEnded={() => {
+            setIsVideoPlaying(false);
+            handleEnd();
+          }}
         />
       </div>
       <br />
@@ -206,6 +253,19 @@ export default function VideoPlayer() {
             {outOfFocusTimeStamp.map((timestamp, index) => (
               <li key={index}>
                 {index + 1}. From {timestamp.start} to {timestamp.end}
+              </li>
+            ))}
+          </ul>
+        </div>
+        <br />
+        <hr />
+        <br />
+        <p class="text-2xl">Tab Switch Timestamps:</p>
+        <div>
+          <ul>
+            {tabSwitchTimeStamp.map((timestamp, index) => (
+              <li key={index}>
+                {index + 1}. Out-Of-Focus at {timestamp.start} | In-Focus at {timestamp.end}
               </li>
             ))}
           </ul>
