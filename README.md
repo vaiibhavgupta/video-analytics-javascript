@@ -26,7 +26,3 @@ This is a project to track pauses, skips, watch duration, speed change, etc amon
 
    `npm start`
 
-## Project Deployment
-
-The web-app is deployed [here](https://video-analytics-vaiibhavgupta.vercel.app).
-
